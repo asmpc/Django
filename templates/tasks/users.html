@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+.table-emerald thead {
+    background-color: #10b981;
+    color: white;
+}
+
+.table-emerald tbody tr:hover {
+    background-color: #d1fae5;
+}
+
+.table-emerald td:hover,
+.table-emerald th:hover {
+    background-color: #D6F9FA;
+}
+
+.table-emerald td,
+.table-emerald th {
+    transition: background-color 0.2s;
+}
+</style>
+
+<div class="container mt-4" style="max-width: 350px;">
+
+<table class="table table-bordered table-striped text-center table-emerald">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Age</th>
+      <th scope="col">Photo</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for user in users %}
+    <tr>
+      <td>{{ user.name }}</td>
+      <td>{{ user.age }}</td>
+      <td><img src="{% static user.photo %}" width="40"></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+</div>
+
+{% endblock %}

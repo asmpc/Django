@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.table-emerald thead {
+    background-color: #10b981;
+    color: white;
+}
+
+.table-emerald tbody tr:hover {
+    background-color: #d1fae5;
+}
+
+.table-emerald td:hover,
+.table-emerald th:hover {
+    background-color: #D6F9FA;
+}
+
+.table-emerald td,
+.table-emerald th {
+    transition: background-color 0.2s;
+}
+</style>
+
+<div class="container mt-4" style="max-width: 500px;">
+
+<table class="table table-bordered table-striped text-center table-emerald">
+  <thead>
+    <tr>
+      <th scope="col">Task_name</th>
+      <th scope="col">Status</th>
+      <th scope="col">Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for task in tasks %}
+    <tr>
+      <td>{{ task.task_name }}</td>
+      <td>{{ task.status | title }}</td>
+      <td>{{ task.priority | title}}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
