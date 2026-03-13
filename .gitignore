@@ -132,3 +132,6 @@ dmypy.json
 .pyre/
 # My test
 Test/
+
+# Static files
+static
