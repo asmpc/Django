@@ -1,0 +1,91 @@
+Django_3_MODELS_QUERYSET
+
+2) Получить все задачи из базы данных.
+In [1]: tasks = Tasks.objects.all()
+
+In [2]: tasks
+
+3) Вывести список задач, отображая только их название и статус.
+In [26]: lst=[]
+
+In [27]: for i in tasks:
+    ...:     lst.append((i.name, i.status))
+    ...:
+
+In [28]: print(lst)
+
+4) Найти все задачи со статусом created или started.
+
+In [1]: qs = Tasks.objects.filter(Q(status="created") | Q(status="started"))
+
+In [2]: qs
+
+или
+
+In [1]: qs = Tasks.objects.filter(status__in=["created", "started"])
+
+In [2]: qs
+
+5) Найти все задачи с приоритетом 5.
+
+In [3]: tasks  = Tasks.objects.filter(priority=5)
+
+In [4]: task
+
+6) Получить список задач, которые были переоткрыты
+
+In [6]: tasks  = Tasks.objects.filter(is_reopen=True)
+
+In [7]: tasks
+
+7) Отсортировать все задачи по приоритету (по убыванию), затем по дате создания (сначала новые).
+
+In [8]: tasks = Tasks.objects.order_by("-priority")
+
+In [9]: tasks
+
+In [12]: tasks = Tasks.objects.order_by("-created_at")
+
+In [13]: tasks
+
+In [14]: tasks = Tasks.objects.order_by("-priority", "-created_at")
+
+In [15]: tasks
+
+8) Подсчитать общее количество задач в системе.
+
+In [12]: Tasks.objects.all().count()
+
+9) Найти самую последнюю созданную задачу.
+
+In [1]: Tasks.objects.latest("created_at")
+
+10) Получить все задачи, которые находятся в работе (исключить completed и canceled).
+
+In [13]: Tasks.objects.exclude(status__in=["completed", "canceled"])
+
+11) Найти все задачи, у которых есть описание.
+
+In [5]: qs = Tasks.objects.filter(description__isnull=False)
+
+In [6]: qs
+
+12) *Подсчитать количество задач для каждого статуса.
+
+In [7]: Tasks.objects.values("status").annotate(Count("status"))
+
+13) *Определить процент задач со статусом completed.
+
+tasks_qa = Tasks.objects.all().count()
+
+tasks_qc = Tasks.objects.filter(status="completed").count()
+
+tasks_qc * 100 / tasks_qa if tasks_qa > 0 else 0
+
+14) *Найти задачи, которые не обновлялись более 3 дней.
+
+from datetime import timedelta
+
+tda = timezone.now() - timedelta(3)
+
+tasks = Tasks.objects.filter(updated_at__lt=tda)
