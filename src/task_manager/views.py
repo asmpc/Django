@@ -2,6 +2,8 @@ from django.shortcuts import render
 
 from django.http import HttpResponse
 
+from task_manager.models import Tasks
+
 # MTV
 def index(request):
     return render (request,"home.html")
@@ -22,15 +24,8 @@ def user(request):
     return render (request,"users.html", context=context)
 
 def task(request):
-    tasks = [
-        {"task_name": "Fix login bug", "status": "in progress", "priority": "high"},
-        {"task_name": "Create navbar", "status": "done", "priority": "medium"},
-        {"task_name": "Write tests", "status": "todo", "priority": "high"},
-        {"task_name": "Update documentation", "status": "todo", "priority": "low"},
-        {"task_name": "Deploy project", "status": "in progress", "priority": "medium"}
-    ]
 
     context = {
-        'tasks': tasks,
+        'tasks': Tasks.objects.all().order_by('id')
     }
     return render (request,"tasks.html", context=context)

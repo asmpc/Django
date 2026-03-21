@@ -14,6 +14,10 @@ In [27]: for i in tasks:
 
 In [28]: print(lst)
 
+или
+
+Tasks.objects.values("name","status")
+
 4) Найти все задачи со статусом created или started.
 
 In [1]: qs = Tasks.objects.filter(Q(status="created") | Q(status="started"))
