@@ -23,12 +23,13 @@
 }
 </style>
 
-<div class="container mt-4" style="max-width: 500px;">
+<div class="container mt-4" style="max-width: 1000px;">
 
 <table class="table table-bordered table-striped text-center table-emerald">
   <thead>
     <tr>
       <th scope="col">Task_name</th>
+      <th scope="col">Description</th>
       <th scope="col">Status</th>
       <th scope="col">Priority</th>
     </tr>
@@ -36,7 +37,12 @@
   <tbody>
   {% for task in tasks %}
     <tr>
-      <td>{{ task.task_name }}</td>
+      <td>{{ task.name }}</td>
+      {% if task.description is not None %}
+        <td>{{ task.description }}</td>
+      {% else %}
+        <td></td>
+      {% endif %}
       <td>{{ task.status | title }}</td>
       <td>{{ task.priority | title}}</td>
     </tr>
