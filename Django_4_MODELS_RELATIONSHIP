@@ -1,0 +1,27 @@
+5)	Получить все задачи, у которых есть хотя бы один комментарий
+
+tasks = Tasks.objects.filter(comments__isnull=False)
+
+6)	Получить все проекты, у которых есть подробное описание в ProjectDetails
+
+projects = Projects.objects.filter(project_detail__isnull=False)
+
+7)	Получить все задачи, которые входят в проект с ID = 3
+
+tasks = Projects.objects.get(project_detail__serial_id = 3).tasks.all()
+
+8)	Получить все задачи, у которых тег имеет наименование “Django".
+
+tasks = Tasks.objects.filter(tags__name="Django")
+
+9)	Получить все комментарии, который делал пользователь с ID = 2 по задаче с тегом “Django".
+
+comments = Comments.objects.filter(user__id=2, task__tags__name="Django")
+
+10)	Получить все проекты, в которых есть хоть одна задача со статусом “canceled”
+
+projects = Projects.objects.filter(tasks__status="canceled")
+
+11)	Получить все задачи, сделанные пользователями, у который сделал комментарий более чем по 2 задачам
+
+tasks = Tasks.objects.filter(assignee__in=User.objects.annotate(comments_count=Count("comments")).filter(comments_count__gt=2))
