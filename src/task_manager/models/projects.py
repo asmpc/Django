@@ -22,8 +22,10 @@ class Projects(BaseModel):
     owner = models.ForeignKey(
         to="account.User",
         related_name="projects",
+        verbose_name="Руководитель",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
     )
 
     class Meta:

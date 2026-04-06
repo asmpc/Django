@@ -25,27 +25,59 @@
 }
 </style>
 
-<div class="container mt-4" style="max-width: 350px;">
+<div class="container mt-4" style="max-width: 1000px;">
 
 <table class="table table-bordered table-striped text-center table-emerald">
   <thead>
     <tr>
+      <th scope="col">Id</th>
       <th scope="col">Name</th>
-      <th scope="col">Age</th>
-      <th scope="col">Photo</th>
+      <th scope="col">email</th>
+      <th scope="col">phone</th>
     </tr>
   </thead>
   <tbody>
   {% for user in users %}
     <tr>
-      <td>{{ user.name }}</td>
-      <td>{{ user.age }}</td>
-      <td><img src="{% static user.photo %}" width="40"></td>
+      <td>{{ user.id }}</td>
+      <td>{{ user.username }}</td>
+      <td>{{ user.email}}</td>
+      <td>{{ user.phone}}</td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+<div class="d-flex justify-content-center mt-4">
+  <nav>
+    <ul class="pagination">
 
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1">« Первая страница</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">‹ Предудыщая страница</a>
+        </li>
+      {% endif %}
+
+      <li class="page-item active">
+        <span class="page-link">
+          Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+        </span>
+      </li>
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая страница ›</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя страница»</a>
+        </li>
+      {% endif %}
+
+    </ul>
+  </nav>
 </div>
+
 
 {% endblock %}
