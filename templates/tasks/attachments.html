@@ -30,22 +30,38 @@
 <table class="table table-bordered table-striped text-center table-emerald">
   <thead>
     <tr>
-      <th scope="col">Id</th>
       <th scope="col">Name</th>
-      <th scope="col">email</th>
-      <th scope="col">phone</th>
+      <th scope="col">Photo</th>
+      <th scope="col">File</th>
+      <th scope="col">Task</th>
     </tr>
   </thead>
-  <tbody>
-  {% for user in users %}
-    <tr>
-      <td>{{ user.id }}</td>
-      <td>{{ user.username }}</td>
-      <td>{{ user.email}}</td>
-      <td>{{ user.phone}}</td>
+<tbody>
+  {% for attachment in attachments %}
+  <tr>
+      <td>{{ attachment.name }}</td>
+    <td>
+        {% if attachment.photo %}
+          <img style="max-height: 100px" src="{{ attachment.photo.url }}" />
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    <td>
+        {% if attachment.file %}
+          <a href="{{ attachment.file.url }}" target="_blank">
+            Скачать файл
+          </a>
+        {% else %}
+          —
+        {% endif %}
+      </td>
+<td>
+        {{ attachment.task.name }}
+      </td>
     </tr>
   {% endfor %}
-  </tbody>
+</tbody>
 </table>
 <div class="d-flex justify-content-center mt-4">
   <nav>

@@ -20,7 +20,24 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
         return f"{self.email}"
 
     class Meta:
-        ordering = ["-id","-created_at"]
+        ordering = ["id","-created_at"]
         db_table = "users"
-        verbose_name = "User"
-        verbose_name_plural = "Users"
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+
+
+class Owners(User):
+    class Meta:
+        db_table = "owners"
+        verbose_name = "Owner"
+        verbose_name_plural = "Owners"
+
+
+class Employees(User):
+    work_time_hours = models.PositiveSmallIntegerField
+    worktime_timezone = models.SmallIntegerField()
+
+    class Meta:
+        db_table = "employees"
+        verbose_name = "Employee"
+        verbose_name_plural = "Employees"

@@ -16,6 +16,7 @@ class Tags(BaseModel):
     tasks = models.ManyToManyField(
         to='Tasks',
         related_name="tags",
+        verbose_name="Задачи",
     )
 
     class Meta:

@@ -8,7 +8,7 @@ from config.models import BaseModel
 class Comments(BaseModel):
     message = models.CharField(
         max_length=64,
-        unique=True,
+        unique=False,
         null=False,
         blank=False,
         verbose_name="Текст комментария",
@@ -20,12 +20,14 @@ class Comments(BaseModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        verbose_name="Пользователь",
     )
 
     task = models.ForeignKey(
         to="Tasks",
         related_name="comments",
         on_delete=models.CASCADE,
+        verbose_name="Задача",
     )
 
     class Meta:

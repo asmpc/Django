@@ -13,9 +13,18 @@ class UserManager(BaseUserManager):
     def create_user(self, email, password):
         return self._create_user(email, password)
 
+    # получаем всех superusers
+    def all_superusers(self):
+        return self.filter(is_superuser=True)
+
+    # получаем всех is_staff
+    def all_staff(self):
+        return self.filter(is_staff=True)
+
     def create_superuser(self, email, password):
         kwargs = {
             'is_superuser': True,
             'is_staff': True,
         }
         return self._create_user(email, password, **kwargs)
+

@@ -44,9 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'debug_toolbar',
+    'crispy_forms',
+    'crispy_bootstrap5',
     # applications
-    'task_manager',
-    'account',
+    'task_manager.apps.TaskManagerConfig',
+    'account.apps.AccountConfig',
 ]
 
 MIDDLEWARE = [
@@ -54,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -133,7 +137,23 @@ STATICFILES_DIRS = [
     BASE_DIR.parent / "static/images",
 ]
 
+STATIC_ROOT = BASE_DIR / "static"
+
+# media
+MEDIA_URL = 'media/'
+MEDIA_ROOT = 'media_files'
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Internal IPs
+INTERNAL_IPS = [
+    "127.0.0.Django_AGGREGATE",
+]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"

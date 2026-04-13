@@ -24,6 +24,7 @@ class ProjectDetails(BaseModel):
         related_name="project_detail",
         on_delete=models.CASCADE,
         null=True,
+        verbose_name="Проект",
     )
 
     class Meta:

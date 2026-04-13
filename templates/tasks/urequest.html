@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+.table-emerald thead {
+    background-color: #10b981;
+    color: white;
+}
+
+.table-emerald tbody tr:hover {
+    background-color: #d1fae5;
+}
+
+.table-emerald td:hover,
+.table-emerald th:hover {
+    background-color: #D6F9FA;
+}
+
+.table-emerald td,
+.table-emerald th {
+    transition: background-color 0.2s;
+}
+</style>
+
+<div class="container mt-4" style="max-width: 750px;">
+
+<table class="table table-bordered table-striped text-center table-emerald">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Name</th>
+      <th scope="col">email</th>
+      <th scope="col">phone</th>
+      <th scope="col">comments</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>{{ user.username }}</td>
+      <td>{{ user.email}}</td>
+      <td>{{ user.phone}}</td>
+      <td>
+      {% for comment in user.comments.all %}
+        <p>{{ comment.message }} {{"|"}}
+          <b>Задача:</b> {{ comment.task.name }}
+      {% empty %}
+        <p>Нет комментариев</p>
+      {% endfor %}
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+
+</div>
+
+{% endblock %}
