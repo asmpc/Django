@@ -139,12 +139,29 @@ class ProjectAdmin(admin.ModelAdmin):
     def make_admin(self, request, queryset):
         queryset.update(owner=request.user)
 
+class AttachmentAdmin(admin.ModelAdmin):
+    fields = ('name', 'task', 'photo', 'file')
+    list_display = ('name', 'task', "preview")
+
+
+    @admin.display(description='фото')
+    def get_html_photo(objects):
+        if objects.photo:
+            return mark_safe(f'<img src={objects.photo.url} width=50>')
+
+
+
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'tasks_list')
+
+    @admin.display(description="Задачи")
+    def tasks_list(self, obj):
+        return ", ".join(task.name for task in obj.tasks.all())
 
 admin.site.register(Tasks,TaskAdmin)
-admin.site.register(Tags)
+admin.site.register(Tags, TagAdmin)
 # admin.site.register(Projects)
 admin.site.register(ProjectDetails)
 admin.site.register(Comments)
-admin.site.register(Attachments)
+admin.site.register(Attachments, AttachmentAdmin)
 
-# Register your models here.

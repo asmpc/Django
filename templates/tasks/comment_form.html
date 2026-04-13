@@ -5,17 +5,35 @@
 
 {% block content %}
 
-<h3>
-    Форма создания комментария
-</h3>
+<div class="container mt-4" style="max-width: 600px;">
 
-<form action="{% url 'create_comment' %}" method="post">
-    <div class="mb-3">
-        {{ form|crispy }}
+    <h3>Форма создания комментария</h3>
+
+    <form action="{% url 'create_comment' %}" method="post">
         {% csrf_token %}
-    </div>
-    <button type="submit" class="btn btn-primary">Создать комментарий</button>
-</form>
+
+        <div class="mb-3">
+            {{ form|crispy }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Создать комментарий
+        </button>
+    </form>
+
+</div>
+
+<!--<h3>-->
+<!--    Форма создания комментария-->
+<!--</h3>-->
+
+<!--<form action="{% url 'create_comment' %}" method="post">-->
+<!--    <div class="mb-3">-->
+<!--        {{ form|crispy }}-->
+<!--        {% csrf_token %}-->
+<!--    </div>-->
+<!--    <button type="submit" class="btn btn-primary">Создать комментарий</button>-->
+<!--</form>-->
 
 
 {% endblock %}

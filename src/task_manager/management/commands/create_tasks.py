@@ -65,7 +65,7 @@ class Command(BaseCommand):
             #             description=fake.text(max_nb_chars=200),
             #             assignee=random.choice(users),
             #             project=random.choice(projects),
-            #             priority=random.choice(choices(range(1,6))),
+            #             priority=random.choice(choices(range(Django_AGGREGATE,6))),
             #             status=random.choice(TaskStatus.values),
             #         )
             #     )

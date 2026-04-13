@@ -1,0 +1,78 @@
+1.	Подсчитать количество задач по каждому статусу.
+
+Tasks.objects.values("status").annotate(Count('status'))
+
+2.	Найти пользователя (assignee) с наибольшим количеством задач.
+
+User.objects.values("email").annotate(tasks_count=Count("tasks__name")).order_by("-tasks_count").first()
+
+или так:
+
+Tasks.objects.values("assignee__email").annotate(tasks_count=Count("name")).order_by("-tasks_count").first()
+
+3.	Вывести список задач с количеством комментариев у каждой.
+
+Tasks.objects.values("name").annotate(Count("comments"))
+
+4.	Найти задачи, у которых больше 3 комментариев.
+
+Tasks.objects.values("name").annotate(comments_count=Count("comments")).filter(comments_count__gt=3)
+
+5.	Посчитать средний приоритет задач для каждого пользователя.
+
+User.objects.values("email").annotate(Avg("tasks__priority"))
+
+6.	Найти сумму приоритетов задач по каждому тегу
+
+Tags.objects.values('name').annotate(Sum("tasks__priority"))
+
+7.	Найти задачи, у которых количество комментариев больше, чем количество тегов.
+
+Tasks.objects.values("name").annotate(comments_count=Count("comments", distinct=True),
+ tags_count=Count("tags", distinct=True)).filter(comments_count__gt=F("tags_count"))
+
+8.	Найти топ-3 пользователей по количеству комментариев в их задачах.
+
+Tasks.objects.values("assignee__email").annotate(comments_count=Count("comments")).order_by("-comments_count")[:3]
+
+или так:
+
+User.objects.values("email").annotate(comments_count=Count("tasks__comments")).order_by("-comments_count")[:3]
+
+9.	Выполнить raw SQL-запрос для получения задач с максимальным количеством комментариев.
+
+max_count = Tasks.objects.annotate(comments_count=Count("comments")).aggregate(max=Max("comments_count"))["max"]
+
+tasks = Tasks.objects.annotate(comments_count=Count("comments")).filter(comments_count=max_count)
+
+преобразуем наши запросы в один raw
+
+tasks = Tasks.objects.raw("""
+ SELECT tasks.* ,
+       COUNT("comments"."id") AS "comments_count"
+    FROM "tasks"
+     LEFT OUTER JOIN "comments"
+    ON ("tasks"."id" = "comments"."task_id")
+ GROUP BY "tasks"."id"
+HAVING COUNT("comments"."id") = (
+        SELECT MAX("comments_count")
+  FROM (
+        SELECT COUNT("comments"."id") AS "comments_count"
+          FROM "tasks"
+          LEFT OUTER JOIN "comments"
+            ON ("tasks"."id" = "comments"."task_id")
+         GROUP BY "tasks"."id"
+       ) subquery
+    )
+""")
+
+10.	Найти задачи, у которых количество комментариев больше 5 и при этом их priority выше среднего по всем задачам.
+
+avg_priority=Tasks.objects.aggregate(avg=Avg("priority"))["avg"]
+
+tasks = Tasks.objects.values("name").annotate(comments_count=Count("comments")).filter(comments_count__gt=5, priority__gt=avg_priority)
+
+11.	*Реализовать создание задачи и нескольких комментариев в одной транзакции (с откатом при ошибке).
+
+12.	*Получить задачу с блокировкой строки и изменить её статус (использовать select_for_update).
+

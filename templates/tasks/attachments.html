@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block content %}
 
 <style>
@@ -23,57 +25,44 @@
 }
 </style>
 
-<div class="container mt-4" style="max-width: 1200px;">
+<div class="container mt-4" style="max-width: 1000px;">
 
 <table class="table table-bordered table-striped text-center table-emerald">
   <thead>
     <tr>
-      <th scope="col">Project</th>
-      <th scope="col">Task_name</th>
-      <th scope="col">Description</th>
-      <th scope="col">Tags</th>
-      <th scope="col">Assignee</th>
-      <th scope="col">Status</th>
-      <th scope="col">Priority</th>
-      <th scope="col">Comments</th>
-      <th scope="col">Attachments</th>
+      <th scope="col">Name</th>
+      <th scope="col">Photo</th>
+      <th scope="col">File</th>
+      <th scope="col">Task</th>
     </tr>
   </thead>
-  <tbody>
-  {% for task in tasks %}
-    <tr>
-      <td>{{ task.project }}</td>
-      <td>{{ task.name }}</td>
-      <td>{{ task.description }}</td>
-<td>
-      {% for tag in task.tags.all %}
-        {{ tag.name }} {{"|"}}
-      {% endfor %}
-</td>
-      {% if task.assignee %}
-        <td>{{ task.assignee }}</td>
-      {% else %}
-        <td></td>
-      {% endif %}
-      <td>{{ task.status | title }}</td>
-      <td>{{ task.priority | title }}</td>
-<td>
-      {% for comment in task.comments.all %}
-        <p>{{ comment.message }} {{"|"}}
-      {% endfor %}
-</td>
-      <td>
-      {% for attachment in task.attachments.all %}
+<tbody>
+  {% for attachment in attachments %}
+  <tr>
+      <td>{{ attachment.name }}</td>
+    <td>
         {% if attachment.photo %}
-          <img style="max-height: 100px" src="{{ attachment.photo.url }}"/>
+          <img style="max-height: 100px" src="{{ attachment.photo.url }}" />
+        {% else %}
+          —
         {% endif %}
-      {% endfor %}
-</td>
+      </td>
+    <td>
+        {% if attachment.file %}
+          <a href="{{ attachment.file.url }}" target="_blank">
+            Скачать файл
+          </a>
+        {% else %}
+          —
+        {% endif %}
+      </td>
+<td>
+        {{ attachment.task.name }}
+      </td>
     </tr>
   {% endfor %}
-  </tbody>
+</tbody>
 </table>
-
 <div class="d-flex justify-content-center mt-4">
   <nav>
     <ul class="pagination">
@@ -105,5 +94,6 @@
     </ul>
   </nav>
 </div>
+
 
 {% endblock %}

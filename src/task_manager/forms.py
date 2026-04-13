@@ -3,7 +3,14 @@ from django.forms import  Textarea
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 
-from task_manager.models import Tasks, Comments, Tags
+from task_manager.models import Tasks, Comments, Tags, Attachments
+
+
+class AttachmentForm(forms.ModelForm):
+    class Meta:
+        model = Attachments
+        fields = ['name', 'task', 'photo', 'file']
+
 
 
 
@@ -38,7 +45,7 @@ class TaskForm(forms.ModelForm):
 
         if not description and priority > 3:
             raise ValidationError(
-                "Без описания приоритет может быть только от 1 до 3"
+                "Без описания приоритет может быть только от Django_AGGREGATE до 3"
             )
 
         return description
@@ -71,7 +78,7 @@ class TaskForm(forms.ModelForm):
 #     priority = forms.IntegerField(
 #         label="Приоритет задачи",
 #         validators=[
-#             MinValueValidator(1),
+#             MinValueValidator(Django_AGGREGATE),
 #                     MaxValueValidator(5)]
 #     )
 #     description = forms.CharField(
@@ -90,7 +97,7 @@ class TaskForm(forms.ModelForm):
 #
 #         if not description and priority > 3:
 #             raise ValidationError(
-#                 "Без описания приоритет может быть только от 1 до 3"
+#                 "Без описания приоритет может быть только от Django_AGGREGATE до 3"
 #             )
 #
 #         return priority

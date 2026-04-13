@@ -137,6 +137,13 @@ STATICFILES_DIRS = [
     BASE_DIR.parent / "static/images",
 ]
 
+STATIC_ROOT = BASE_DIR / "static"
+
+# media
+MEDIA_URL = 'media/'
+MEDIA_ROOT = 'media_files'
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -144,7 +151,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Internal IPs
 INTERNAL_IPS = [
-    "127.0.0.1",
+    "127.0.0.Django_AGGREGATE",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 
-from task_manager.models import Tasks, Comments
+from task_manager.models import Tasks, Comments, Attachments
 from account.models import User
 
 from django.http import HttpResponseRedirect
@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from django.core.paginator import Paginator, EmptyPage
 
-from .forms import TaskForm, CommentForm, TagForm
+from .forms import TaskForm, CommentForm, TagForm, AttachmentForm
 
 
 
@@ -31,6 +31,20 @@ def user(request):
 
     return render (request,"users.html", context=context)
 
+def attachments(request):
+
+    attachments_qs = Attachments.objects.all().order_by('id')
+    paginator = Paginator(attachments_qs, 10)
+    page_number = request.GET.get('page')
+    page_objc = paginator.get_page(page_number)
+
+    context = {
+        'attachments': page_objc,
+        'page_obj': page_objc
+    }
+
+    return render (request,"attachments.html", context=context)
+
 
 def urequest(request, user_id):
 
@@ -49,7 +63,7 @@ def urequest(request, user_id):
 def task(request):
     tasks_qs = (Tasks.objects.select_related("assignee", "project")
                 .prefetch_related("tags", "comments")
-                .all().order_by('-created_at'))
+                .all().order_by('name', '-created_at')) #'name',
     paginator = Paginator(tasks_qs, 10)
     page_number = request.GET.get('page')
     page_objc = paginator.get_page(page_number)
@@ -140,3 +154,18 @@ def create_tag_form(request):
         form = TagForm()
 
     return render(request, "tag_form.html", {"form": form})
+
+def create_attachment_form(request):
+
+    if request.method == "POST":
+
+        form = AttachmentForm(request.POST, request.FILES)
+
+        if form.is_valid():
+
+            form.save()
+            return HttpResponseRedirect(reverse("task"))
+    else:
+        form = AttachmentForm()
+
+    return render(request, "attachment_form.html", {"form": form})
