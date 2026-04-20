@@ -135,3 +135,6 @@ Test/
 
 # Static files
 static
+
+# Cache file
+cache

@@ -43,14 +43,21 @@
       <td>{{ user.username }}</td>
       <td>{{ user.email}}</td>
       <td>{{ user.phone}}</td>
-      <td>
-      {% for comment in user.comments.all %}
-        <p>{{ comment.message }} {{"|"}}
-          <b>Задача:</b> {{ comment.task.name }}
-      {% empty %}
+    <td>
+    {% for comment in user.comments.all %}
+        <p>
+            {{ comment.message }} |
+            <b>Задача:</b> {{ comment.task.name }}
+
+            <a href="{% url 'comment_delete' comment.id %}"
+               class="btn btn-sm btn-danger">
+                удалить
+            </a>
+        </p>
+    {% empty %}
         <p>Нет комментариев</p>
-      {% endfor %}
-      </td>
+    {% endfor %}
+    </td>
     </tr>
 
   </tbody>

@@ -79,7 +79,7 @@ class TaskAdmin(admin.ModelAdmin):
     # поиск по полям (связанные сущности через __)
     search_fields = ('name', 'project__name', 'assignee__username',)
     # сортировка
-    ordering = ('-priority', 'name',)
+    ordering = ('-created_at',) #('-priority', 'name',)
     # actions
     actions = ('make_completed', 'make_canceled', 'make_reopen', 'make_comment', 'make_admin',)
 

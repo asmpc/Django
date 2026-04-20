@@ -1,17 +1,23 @@
 
 from django.urls import path, re_path
-from task_manager.views import (index,task, user,
-                                urequest, create_task_form, create_comment_form,
-                                create_tag_form, create_attachment_form, attachments)
+from task_manager.views import (HomePage,TasksPage, UserPage,
+                                UrequestPage, CreateTask, CreateComment,
+                                CreateTag, CreateAttachment, AttachmentsPage, DeleteCommentPage)
+from django.views.decorators.cache import cache_page
+
 
 urlpatterns = [
-    path('', index, name='home'),
-    path('tasks', task, name='task'),
-    path('users', user, name='user'),
-    path('users/<int:user_id>/', urequest, name='urequest'),
-    path('create', create_task_form, name='create_task'),
-    path('comment', create_comment_form, name='create_comment'),
-    path('tag', create_tag_form, name='create_tag'),
-    path('attachment', create_attachment_form, name='create_attachment'),
-    path('attachments', attachments, name='attachments'),
+    path('', HomePage.as_view(), name='home'),
+
+    # кэшируем на 10 минут используя redis по умолчанию
+    path('tasks', cache_page(60 * 10)(TasksPage.as_view()), name='task'),
+
+    path('users', UserPage.as_view(), name='user'),
+    path('users/<int:pk>/', UrequestPage.as_view(), name='urequest'),
+    path('create', CreateTask.as_view(), name='create_task'),
+    path('comment', CreateComment.as_view(), name='create_comment'),
+    path('tag', CreateTag.as_view(), name='create_tag'),
+    path('attachment', CreateAttachment.as_view(), name='create_attachment'),
+    path('attachments', AttachmentsPage.as_view(), name='attachments'),
+    path('comment_delete/<int:pk>/', DeleteCommentPage.as_view(), name='comment_delete'),
 ]
