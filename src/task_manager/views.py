@@ -35,9 +35,13 @@ class TasksPage(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return (Tasks.objects.select_related("assignee", "project")
-                .prefetch_related("tags", "comments")
-                .all().order_by( '-created_at'))
+        return Tasks.objects.task_optimization()
+
+        # до подключения кастомного менеджера
+
+        # return (Tasks.objects.select_related("assignee", "project")
+        #         .prefetch_related("tags", "comments")
+        #         .all().order_by( '-created_at'))
 
 
 
@@ -100,7 +104,9 @@ class AttachmentsPage(ListView):
     context_object_name = "attachments"
     paginate_by = 10
     def get_queryset(self):
-        return Attachments.objects.select_related('task').all().order_by('id')
+        return Attachments.objects.attachment_optimization()
+
+        # return Attachments.objects.select_related('task').all().order_by('id')
 
 
 # # кэшируем вьюшку на 30 минут используя кэш базы данных

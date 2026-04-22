@@ -1,5 +1,5 @@
 
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from task_manager.views import (HomePage,TasksPage, UserPage,
                                 UrequestPage, CreateTask, CreateComment,
                                 CreateTag, CreateAttachment, AttachmentsPage, DeleteCommentPage)
@@ -20,4 +20,5 @@ urlpatterns = [
     path('attachment', CreateAttachment.as_view(), name='create_attachment'),
     path('attachments', AttachmentsPage.as_view(), name='attachments'),
     path('comment_delete/<int:pk>/', DeleteCommentPage.as_view(), name='comment_delete'),
+    path("api/", include("task_manager.v1.urls")),
 ]

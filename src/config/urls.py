@@ -19,8 +19,18 @@ from django.urls import path, include
 from debug_toolbar.toolbar import debug_toolbar_urls
 from django.conf.urls.static import static
 from config import settings
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('tasks/', include('task_manager.urls'))
+    path('tasks/', include('task_manager.urls')),
+
+    path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
+
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
 ] + debug_toolbar_urls() + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

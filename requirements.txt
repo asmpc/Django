@@ -10,3 +10,8 @@ django-crispy-forms==2.6
 crispy-bootstrap5==2026.3
 pillow==12.2.0
 redis==7.4.0
+djangorestframework==3.17.1
+Markdown==3.10.2
+django-filter==25.2
+drf-spectacular==0.29.0
+
