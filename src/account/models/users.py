@@ -14,6 +14,12 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     email = models.EmailField(max_length=64, unique=True)
     USERNAME_FIELD = 'email'
 
+
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(auto_now_add=True)
+
+
+
     objects = UserManager()
 
     def __str__(self):
