@@ -2,6 +2,10 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from config.models import BaseModel
+from task_manager.managers import TaskManager
+
+
+
 
 class TaskStatus(models.TextChoices):
     CREATED = 'created'
@@ -58,8 +62,10 @@ class Tasks(BaseModel):
         blank=True,
     )
 
+    objects = TaskManager()
+
     class Meta:
-        ordering = ["name", "-created_at"]
+        ordering = [ "-created_at", "name"]
         db_table = "tasks"
         verbose_name = "Задача"
         verbose_name_plural = "Задачи"

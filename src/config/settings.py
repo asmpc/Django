@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'crispy_forms',
     'crispy_bootstrap5',
+    'rest_framework',
+    'drf_spectacular',
+
     # applications
     'task_manager.apps.TaskManagerConfig',
     'account.apps.AccountConfig',
@@ -55,7 +58,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    # кэш всего сайта
+    # "django.middleware.cache.UpdateCacheMiddleware",
     'django.middleware.common.CommonMiddleware',
+    # "django.middleware.cache.FetchFromCacheMiddleware",
+
     'django.middleware.csrf.CsrfViewMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -132,12 +140,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR.parent / "static/images",
+    BASE_DIR.parent/ "static/",
 ]
 
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_URL = 'static/'
+STATIC_ROOT = "static_files"
 
 # media
 MEDIA_URL = 'media/'
@@ -151,9 +159,56 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Internal IPs
 INTERNAL_IPS = [
-    "127.0.0.Django_AGGREGATE",
+    "127.0.0.1",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Cache
+
+
+CACHES = {
+# LocMemCache
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+#         "LOCATION": "unique-snowflake",
+#     },
+
+# Filesystem caching
+    "filesystem_cache": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": BASE_DIR.parent / "cache",
+    },
+
+# Database caching (python src\manage.py createcachetable)
+    "database_cache": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "cache_table",
+    },
+# Redis
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379", # или redis://username:password@127.0.0.1:6379
+    }
+
+}
+
+# rest framework
+REST_FRAMEWORK = {
+    # Пагинация для REST
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,  # сколько объектов на страницу
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# spectacular
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Task_tracker',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}

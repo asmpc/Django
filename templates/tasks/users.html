@@ -4,6 +4,8 @@
 
 {% block content %}
 
+{% load cache %}
+
 <style>
 .table-emerald thead {
     background-color: #10b981;
@@ -27,6 +29,8 @@
 
 <div class="container mt-4" style="max-width: 1000px;">
 
+{% cache 1200 using="filesystem_cache" "users_table" request.GET.page %}
+
 <table class="table table-bordered table-striped text-center table-emerald">
   <thead>
     <tr>
@@ -47,6 +51,9 @@
   {% endfor %}
   </tbody>
 </table>
+
+{% endcache %}
+
 <div class="d-flex justify-content-center mt-4">
   <nav>
     <ul class="pagination">

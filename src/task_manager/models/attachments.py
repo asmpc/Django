@@ -5,6 +5,8 @@ from django.contrib import admin
 from config.models import BaseModel
 from django.utils.html import format_html
 from django.core.exceptions import ValidationError
+from task_manager.managers import AttachmentManager
+
 
 
 def validate_file_size(value):
@@ -50,6 +52,8 @@ class Attachments(BaseModel):
         validators=[validate_file_size, validate_file_type],
         verbose_name="Файл"
     )
+
+    objects = AttachmentManager()
 
     class Meta:
         ordering = ["name"]
