@@ -1,6 +1,8 @@
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
 from task_manager.models import Tasks
 from task_manager.v1.serializers import TaskSerializer
 from rest_framework import status, mixins, generics
@@ -37,6 +39,8 @@ class TasksListAPIView(
     #              .all().order_by( '-id'))
 
     serializer_class = TaskSerializer
+
+    # permission_classes = [IsAdminUser]
 
     # Добавляю пагинацию во вьюшку
     pagination_class = TaskPagination

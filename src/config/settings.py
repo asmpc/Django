@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from config.env import env, BASE_DIR
+from django.urls import reverse_lazy
+from datetime import timedelta
 
 # False if not in os.environ because of casting above
 DEBUG = env('DEBUG')
@@ -49,6 +51,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'rest_framework',
     'drf_spectacular',
+    'rest_framework.authtoken', # подключаем токен
+    'rest_framework_simplejwt',
 
     # applications
     'task_manager.apps.TaskManagerConfig',
@@ -67,6 +71,9 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    # 'django.contrib.auth.middleware.LoginRequiredMiddleware',     # доступа не будет полностью, пока не залогинишься
+
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -202,6 +209,18 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5,  # сколько объектов на страницу
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'task_manager.v1.authentication.CustomJWTAuthentication',
+    ],
+
 }
 
 # spectacular
@@ -211,4 +230,26 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
+}
+
+
+
+LOGOUT_REDIRECT_URL = reverse_lazy('home')
+LOGIN_REDIRECT_URL = reverse_lazy('home')
+
+LOGIN_URL = "/login/"
+
+# jwt
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(env('ACCESS_TOKEN_LIFETIME_MINUTES'))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=int(env('REFRESH_TOKEN_LIFETIME_MINUTES'))),
+
+    "ALGORITHM": env('JWT_ALGORITHM'),
+    "SIGNING_KEY": env('SECRET_KEY'),
+
+    "AUTH_HEADER_TYPES": ("JWT",),
+
+    # при refresh выдается новый, старый сразу в blacklist
+    "ROTATE_REFRESH_TOKENS": True,
+
 }

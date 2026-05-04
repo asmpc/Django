@@ -9,8 +9,8 @@ from django.views.decorators.cache import cache_page
 urlpatterns = [
     path('', HomePage.as_view(), name='home'),
 
-    # кэшируем на 10 минут используя redis по умолчанию
-    path('tasks', cache_page(60 * 10)(TasksPage.as_view()), name='task'),
+                                                            # кэшируем на 10 минут используя redis по умолчанию
+    path('tasks', TasksPage.as_view(), name='task'),  # cache_page(60 * 10)(TasksPage.as_view())
 
     path('users', UserPage.as_view(), name='user'),
     path('users/<int:pk>/', UrequestPage.as_view(), name='urequest'),
