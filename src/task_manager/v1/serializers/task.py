@@ -1,6 +1,8 @@
+from django_filters import OrderingFilter
 from rest_framework import serializers
 from task_manager.models import Tasks
 from task_manager.v1.serializers.comment import CommentSerializer
+import django_filters
 
 
 
@@ -22,6 +24,76 @@ class TaskSerializer(serializers.ModelSerializer):
         if len(value) < 5:
             raise serializers.ValidationError("Task name must be atleast 5 characters")
         return value
+
+
+
+class TaskQueryFilterSerializer(django_filters.FilterSet):
+    assignee__email = django_filters.CharFilter(
+        field_name='assignee__email',
+        lookup_expr='iexact',
+        label='Assignee email',
+        help_text='Filter by exact email of assignee'
+    )
+
+    name = django_filters.CharFilter(
+        lookup_expr='icontains',
+        label='Task name',
+        help_text='Case-insensitive search in task name'
+    )
+
+    priority = django_filters.NumberFilter(
+        field_name='priority',
+        label='Priority',
+        help_text='Exact priority value'
+    )
+
+    priority__gte = django_filters.NumberFilter(
+        field_name='priority',
+        lookup_expr='gte',
+        label='Min priority'
+    )
+
+    priority__lte = django_filters.NumberFilter(
+        field_name='priority',
+        lookup_expr='lte',
+        label='Max priority'
+    )
+
+    created_at = django_filters.DateFilter(
+        field_name='created_at',
+        label='Created date',
+        help_text='Filter by exact creation date'
+    )
+
+    created_at__gte = django_filters.DateFilter(
+        field_name='created_at',
+        lookup_expr='gte',
+        label='Created after'
+    )
+
+    created_at__lte = django_filters.DateFilter(
+        field_name='created_at',
+        lookup_expr='lte',
+        label='Created before'
+    )
+
+    description = django_filters.CharFilter(
+        field_name='description',
+        lookup_expr='icontains',
+        label='Description contains'
+    )
+
+    # сортировка ограничена только этими полями
+    ordering = OrderingFilter(
+        fields=(
+            ('status', 'status'),
+            ('priority', 'priority'),
+        )
+    )
+
+    class Meta:
+        model = Tasks
+        fields = ['status']
 
 
 

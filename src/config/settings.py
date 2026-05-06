@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework.authtoken', # подключаем токен
     'rest_framework_simplejwt',
+    'django_filters',
 
     # applications
     'task_manager.apps.TaskManagerConfig',
@@ -204,21 +205,25 @@ CACHES = {
 
 # rest framework
 REST_FRAMEWORK = {
-    # Пагинация для REST
+    # Пагинация для REST / можно переопределить на кастомный пагинатор
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 5,  # сколько объектов на страницу
+    'PAGE_SIZE': 10,  # сколько объектов на страницу
+
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'task_manager.v1.authentication.CustomJWTAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'task_manager.v1.authentication.CustomJWTAuthentication',
     ],
 
 }

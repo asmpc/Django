@@ -2,6 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from account.models import User
+from config.pagination import CustomPagination
 from task_manager.v1.serializers import UserSerializer
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -11,38 +12,31 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.settings import api_settings
 from drf_spectacular.utils import extend_schema
+from rest_framework import status, mixins, generics
 
 
 
-
+#generics
 
 @extend_schema(tags=['User'])
-class UsersListAPIView(APIView):
-    """
-    List all users, or create a new user.
-    """
+class UsersListAPIView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    generics.GenericAPIView,
+):
+    queryset = User.objects.all().order_by('-id')
+    serializer_class = UserSerializer
+    pagination_class = CustomPagination
+
 
     @extend_schema(
         summary="Get all users",
         description="Get all users",
         responses={200: UserSerializer},
     )
-    def get(self, request, format=None):
-        users = User.objects.all().order_by('-id')
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-        # создаём paginator
-        paginator_class = api_settings.DEFAULT_PAGINATION_CLASS
-        paginator = paginator_class()
-
-        # разбиваю queryset
-        page = paginator.paginate_queryset(users, request)
-
-        # возвращаю
-        serializer = UserSerializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
-
-        # serializer = UserSerializer(users, many=True)
-        # return Response(serializer.data)
 
     @extend_schema(
         summary="Create user",
@@ -50,36 +44,28 @@ class UsersListAPIView(APIView):
         request=UserSerializer,
         responses={201: UserSerializer},
     )
-    def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
 @extend_schema(tags=['User'])
-class UserDetailAPIView(APIView):
-    """
-    Retrieve, update or delete a user instance.
-    """
+class UserDetailAPIView(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView,
+):
+    queryset = User.objects.all().order_by('-id')
+    serializer_class = UserSerializer
 
-
-    def get_object(self, pk):
-        try:
-            return User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404
 
     @extend_schema(
         summary="Get user by id",
         description="Get user by id",
         responses={200: UserSerializer},
     )
-    def get(self, request, pk, format=None):
-        user = User.objects.get(pk=pk)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
     @extend_schema(
         summary="Update user by id",
@@ -87,22 +73,104 @@ class UserDetailAPIView(APIView):
         request=UserSerializer,
         responses={200: UserSerializer},
     )
-    def put(self, request, pk, format=None):
-        user = self.get_object(pk)
-        serializer = UserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
     @extend_schema(
         summary="Delete user by id",
-        description="Delete user by id",
-    )
-    def delete(self, request, pk, format=None):
-        user = self.get_object(pk)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        description="Delete user by id",)
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+
+# @extend_schema(tags=['User'])
+# class UsersListAPIView(APIView):
+#     """
+#     List all users, or create a new user.
+#     """
+#
+#     @extend_schema(
+#         summary="Get all users",
+#         description="Get all users",
+#         responses={200: UserSerializer},
+#     )
+#     def get(self, request, format=None):
+#         users = User.objects.all().order_by('-id')
+#
+#         # создаём paginator
+#         paginator_class = api_settings.DEFAULT_PAGINATION_CLASS
+#         paginator = paginator_class()
+#
+#         # разбиваю queryset
+#         page = paginator.paginate_queryset(users, request)
+#
+#         # возвращаю
+#         serializer = UserSerializer(page, many=True)
+#         return paginator.get_paginated_response(serializer.data)
+#
+#         # serializer = UserSerializer(users, many=True)
+#         # return Response(serializer.data)
+#
+#     @extend_schema(
+#         summary="Create user",
+#         description="Create user",
+#         request=UserSerializer,
+#         responses={201: UserSerializer},
+#     )
+#     def post(self, request, format=None):
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# @extend_schema(tags=['User'])
+# class UserDetailAPIView(APIView):
+#     """
+#     Retrieve, update or delete a user instance.
+#     """
+#
+#
+#     def get_object(self, pk):
+#         try:
+#             return User.objects.get(pk=pk)
+#         except User.DoesNotExist:
+#             raise Http404
+#
+#     @extend_schema(
+#         summary="Get user by id",
+#         description="Get user by id",
+#         responses={200: UserSerializer},
+#     )
+#     def get(self, request, pk, format=None):
+#         user = User.objects.get(pk=pk)
+#         serializer = UserSerializer(user)
+#         return Response(serializer.data)
+#
+#     @extend_schema(
+#         summary="Update user by id",
+#         description="Update user by id",
+#         request=UserSerializer,
+#         responses={200: UserSerializer},
+#     )
+#     def put(self, request, pk, format=None):
+#         user = self.get_object(pk)
+#         serializer = UserSerializer(user, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#     @extend_schema(
+#         summary="Delete user by id",
+#         description="Delete user by id",
+#     )
+#     def delete(self, request, pk, format=None):
+#         user = self.get_object(pk)
+#         user.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # используя rest_framework.response (+markdown)

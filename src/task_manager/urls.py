@@ -11,7 +11,6 @@ urlpatterns = [
 
                                                             # кэшируем на 10 минут используя redis по умолчанию
     path('tasks', TasksPage.as_view(), name='task'),  # cache_page(60 * 10)(TasksPage.as_view())
-
     path('users', UserPage.as_view(), name='user'),
     path('users/<int:pk>/', UrequestPage.as_view(), name='urequest'),
     path('create', CreateTask.as_view(), name='create_task'),
@@ -20,5 +19,5 @@ urlpatterns = [
     path('attachment', CreateAttachment.as_view(), name='create_attachment'),
     path('attachments', AttachmentsPage.as_view(), name='attachments'),
     path('comment_delete/<int:pk>/', DeleteCommentPage.as_view(), name='comment_delete'),
-    path("api/", include("task_manager.v1.urls")),
+
 ]

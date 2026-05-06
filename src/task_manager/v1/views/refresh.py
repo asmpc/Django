@@ -1,9 +1,13 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from rest_framework.exceptions import AuthenticationFailed
 
 
+
+
+@extend_schema(tags=["api-token-auth"])
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.data.get("refresh")

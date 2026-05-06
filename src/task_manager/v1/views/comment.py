@@ -22,10 +22,7 @@ from rest_framework import viewsets
 )
 @extend_schema(tags=['Comment'])
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = (Comments.objects
-                .prefetch_related("user", "task")
-                .all().order_by( '-id')
-                )
+    queryset = Comments.objects.comment_optimization()
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
 

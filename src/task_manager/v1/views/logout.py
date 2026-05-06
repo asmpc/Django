@@ -10,7 +10,7 @@ from drf_spectacular.utils import extend_schema
 
 
 @extend_schema(
-    tags=["Auth"],
+    tags=["api-token-auth"],
     summary="Logout user (blacklist refresh token)",
     request={
         "application/json": {

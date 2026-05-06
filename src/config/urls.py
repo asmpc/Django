@@ -27,29 +27,38 @@ from task_manager.v1.views.logout import logout_view
 from task_manager.v1.views.refresh import CustomTokenRefreshView
 
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include('api.urls')),
+
     path('tasks/', include('task_manager.urls')),
-
     path('', include('account.urls')),
-
-    path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
-
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-
-    path('api-token-auth/', views.obtain_auth_token),
-
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+]
 
 
-    path('api/logout/', logout_view, name='logout'),
-    path('api/token/refresh/', CustomTokenRefreshView.as_view()),
 
-
-] + debug_toolbar_urls() + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('tasks/', include('task_manager.urls')),
+#
+#     path('', include('account.urls')),
+#
+#     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
+#
+#     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+#     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+#     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+#
+#     path('api-token-auth/', views.obtain_auth_token),
+#
+#     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+#     # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+#     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+#
+#
+#     path('api/logout/', logout_view, name='logout'),
+#     path('api/token/refresh/', CustomTokenRefreshView.as_view()),
+#
+#
+# ] + debug_toolbar_urls() + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
