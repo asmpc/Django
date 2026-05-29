@@ -33,7 +33,7 @@ SECRET_KEY = env('SECRET_KEY')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 
 # Application definition
@@ -109,6 +109,9 @@ DATABASES = {
         "PASSWORD": env("PG_PASS"),
         "HOST": env("PG_HOST"),
         "PORT": env("PG_PORT"),
+        'TEST': {
+                    'NAME': "test_task_tracker",
+                },
     },
 }
 

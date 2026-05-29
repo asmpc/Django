@@ -4,3 +4,4 @@ from .project_details import ProjectDetails
 from .tags import Tags
 from .comments import Comments
 from .attachments import Attachments
+from .unique_queue import UniqueQueue, QueueStrategy
