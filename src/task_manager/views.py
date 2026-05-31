@@ -19,6 +19,11 @@ from .forms import TaskForm, CommentForm, TagForm, AttachmentForm
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
+from task_manager.tasks import (
+    send_user_comments_email,
+    count_user_comments,
+)
+
 
 
 # MTV
@@ -183,6 +188,14 @@ class UrequestPage(PermissionRequiredMixin, DetailView):
 
     def get_queryset(self):
         return User.objects.prefetch_related('comments__task')
+
+    def get_object(self, queryset=None):
+        user = super().get_object(queryset)
+
+        send_user_comments_email.delay(user.id)
+        count_user_comments.delay(user.id)
+
+        return user
 
 
 # def urequest(request, user_id):
