@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from config.env import env, BASE_DIR
+from django.urls import reverse_lazy
+from datetime import timedelta
 
 # False if not in os.environ because of casting above
 DEBUG = env('DEBUG')
@@ -31,7 +33,7 @@ SECRET_KEY = env('SECRET_KEY')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 
 # Application definition
@@ -49,6 +51,12 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'rest_framework',
     'drf_spectacular',
+    'rest_framework.authtoken', # подключаем токен
+    'rest_framework_simplejwt',
+    'django_filters',
+    'django_celery_results',
+    'django_celery_beat',
+
 
     # applications
     'task_manager.apps.TaskManagerConfig',
@@ -67,6 +75,9 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    # 'django.contrib.auth.middleware.LoginRequiredMiddleware',     # доступа не будет полностью, пока не залогинишься
+
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -101,6 +112,9 @@ DATABASES = {
         "PASSWORD": env("PG_PASS"),
         "HOST": env("PG_HOST"),
         "PORT": env("PG_PORT"),
+        'TEST': {
+                    'NAME': "test_task_tracker",
+                },
     },
 }
 
@@ -130,7 +144,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -197,11 +212,27 @@ CACHES = {
 
 # rest framework
 REST_FRAMEWORK = {
-    # Пагинация для REST
+    # Пагинация для REST / можно переопределить на кастомный пагинатор
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 5,  # сколько объектов на страницу
+    'PAGE_SIZE': 10,  # сколько объектов на страницу
+
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny',
+    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'task_manager.v1.authentication.CustomJWTAuthentication',
+    ],
+
 }
 
 # spectacular
@@ -211,4 +242,59 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
+}
+
+
+
+LOGOUT_REDIRECT_URL = reverse_lazy('home')
+LOGIN_REDIRECT_URL = reverse_lazy('home')
+
+LOGIN_URL = "/login/"
+
+# jwt
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(env('ACCESS_TOKEN_LIFETIME_MINUTES'))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=int(env('REFRESH_TOKEN_LIFETIME_MINUTES'))),
+
+    "ALGORITHM": env('JWT_ALGORITHM'),
+    "SIGNING_KEY": env('SECRET_KEY'),
+
+    "AUTH_HEADER_TYPES": ("JWT",),
+
+    # при refresh выдается новый, старый сразу в blacklist
+    "ROTATE_REFRESH_TOKENS": True,
+
+}
+
+# Celery
+CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+# CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_CACHE_BACKEND = "django-cache"
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+
+    "loggers": {
+        "task_manager": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
 }

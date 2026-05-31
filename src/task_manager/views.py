@@ -1,7 +1,9 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.core.cache import caches
+from django.core.cache import cache
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, DeleteView
 
 from task_manager.models import Tasks, Comments, Attachments, Tags
@@ -14,6 +16,13 @@ from django.urls import reverse, reverse_lazy
 from django.core.paginator import Paginator, EmptyPage
 
 from .forms import TaskForm, CommentForm, TagForm, AttachmentForm
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+
+from task_manager.tasks import (
+    send_user_comments_email,
+    count_user_comments,
+)
 
 
 
@@ -26,16 +35,34 @@ from .forms import TaskForm, CommentForm, TagForm, AttachmentForm
 class HomePage(TemplateView):
     template_name = "home.html"
 
-
+# добавил кэширование qweryset
 # Используем ListView для отображения tasks.html
-class TasksPage(ListView):
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
+class TasksPage(PermissionRequiredMixin, ListView):
     model = Tasks
     template_name = "tasks.html"
     context_object_name = "tasks"
     paginate_by = 10
 
+    # проверка пермиссий используя миксин
+    permission_required = "task_manager.view_tasks"
+
     def get_queryset(self):
-        return Tasks.objects.task_optimization()
+        cache_key = "tasks_all"
+
+        tasks = cache.get(cache_key)
+
+        if tasks is None:
+            tasks = Tasks.objects.task_optimization()
+            cache.set(cache_key, tasks, 60 * 10)
+
+        return tasks
+
+
+
+    # без кэш для auth
+    # def get_queryset(self):
+    #     return Tasks.objects.task_optimization()
 
         # до подключения кастомного менеджера
 
@@ -44,7 +71,7 @@ class TasksPage(ListView):
         #         .all().order_by( '-created_at'))
 
 
-
+# @permission_required("task_manager.view_tasks")
 # def task(request):
 #
 #     # создаем видимость нагрузки
@@ -73,11 +100,16 @@ class TasksPage(ListView):
 
 
 # Используем ListView для отображения users.html
-class UserPage(ListView):
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
+class UserPage(PermissionRequiredMixin, ListView):
     model = User
     template_name = "users.html"
     context_object_name = "users"
     paginate_by = 10
+
+    # проверка пермиссий используя миксин
+    permission_required = "account.view_user"
+
 
     def get_queryset(self):
         return User.objects.all().order_by('id')
@@ -97,14 +129,34 @@ class UserPage(ListView):
 #
 #     return render (request,"users.html", context=context)
 
-@method_decorator(cache_page(timeout=60 * 30, cache="database_cache"), name="dispatch")
-class AttachmentsPage(ListView):
+
+# @method_decorator(cache_page(timeout=60 * 30, cache="database_cache"), name="dispatch")
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
+class AttachmentsPage(PermissionRequiredMixin, ListView):
     model = Attachments
     template_name = "attachments.html"
     context_object_name = "attachments"
     paginate_by = 10
+
+    # проверка пермиссий используя миксин
+    permission_required = "task_manager.view_attachments"
+
+    # корректно кэш с аутентификацией
     def get_queryset(self):
-        return Attachments.objects.attachment_optimization()
+        cache_key = "attachments_all"
+
+        attachments = cache.get(cache_key)
+
+        if attachments  is None:
+            attachments = Attachments.objects.attachment_optimization()
+            cache.set(cache_key, attachments, 60 * 10)
+
+        return attachments
+
+
+
+    # def get_queryset(self):
+    #     return Attachments.objects.attachment_optimization()
 
         # return Attachments.objects.select_related('task').all().order_by('id')
 
@@ -125,14 +177,25 @@ class AttachmentsPage(ListView):
 #
 #     return render (request,"attachments.html", context=context)
 
-
-class UrequestPage(DetailView):
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
+class UrequestPage(PermissionRequiredMixin, DetailView):
     model = User
     template_name = "urequest.html"
     context_object_name = "user"
 
+    # проверка пермиссий используя миксин
+    permission_required = "account.view_user"
+
     def get_queryset(self):
         return User.objects.prefetch_related('comments__task')
+
+    def get_object(self, queryset=None):
+        user = super().get_object(queryset)
+
+        send_user_comments_email.delay(user.id)
+        count_user_comments.delay(user.id)
+
+        return user
 
 
 # def urequest(request, user_id):
@@ -149,11 +212,14 @@ class UrequestPage(DetailView):
 #     return render (request,"urequest.html", context=context)
 
 
-class CreateTask(CreateView):
+class CreateTask(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name = "task_form.html"
     model = Tasks
     form_class = TaskForm
     success_url = reverse_lazy("task")
+
+    # проверка пермиссий используя миксин
+    permission_required = "task_manager.add_tasks"
 
     def form_valid(self, form):
         # сохраняем задачу
@@ -168,9 +234,13 @@ class CreateTask(CreateView):
             message="Task created",
             user=user
         )
-        # чистим кэш
-        for cache in caches.all():
-            cache.clear()
+
+        #  чистим кэш корректно
+        cache.delete("tasks_all")
+
+        # очистка всех кешей
+        # for cache in caches.all():
+        #     cache.clear()
 
         return response
 
@@ -220,18 +290,25 @@ class CreateTask(CreateView):
 #     return render(request, "task_form.html", {"form": form})
 
 
-class CreateComment(CreateView):
+class CreateComment(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name = 'comment_form.html'
     model = Comments
     form_class = CommentForm
     success_url = reverse_lazy("task")
 
+    # проверка пермиссий используя миксин
+    permission_required = 'task_manager.add_comments'
+
     def form_valid(self, form):
         response = super().form_valid(form)
 
+
+        #  чистим кэш корректно
+        cache.delete("tasks_all")
+
         # очистка всех кешей
-        for cache in caches.all():
-            cache.clear()
+        # for cache in caches.all():
+        #     cache.clear()
 
         return response
 
@@ -258,18 +335,26 @@ class CreateComment(CreateView):
 #     return render(request, "comment_form.html", {"form": form})
 
 
-class CreateTag(CreateView):
+class CreateTag(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name = 'tag_form.html'
     model = Tags
     form_class = TagForm
     success_url = reverse_lazy("task")
 
+    # проверка пермиссий используя миксин
+    permission_required = "task_manager.add_tags"
+
     def form_valid(self, form):
         response = super().form_valid(form)
 
+
+        #  чистим кэш корректно
+        cache.delete("tasks_all")
+
+
         # очистка всех кешей
-        for cache in caches.all():
-            cache.clear()
+        # for cache in caches.all():
+        #     cache.clear()
 
         return response
 
@@ -297,18 +382,24 @@ class CreateTag(CreateView):
 #     return render(request, "tag_form.html", {"form": form})
 
 
-class CreateAttachment(CreateView):
+class CreateAttachment(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name = 'attachment_form.html'
     model = Attachments
     form_class = AttachmentForm
     success_url = reverse_lazy("task")
 
+    # проверка пермиссий используя миксин
+    permission_required = "task_manager.add_attachments"
+
     def form_valid(self, form):
         response = super().form_valid(form)
 
+        #  чистим кэш корректно
+        cache.delete("attachments_all")
+
         # очистка всех кешей
-        for cache in caches.all():
-            cache.clear()
+        # for cache in caches.all():
+        #     cache.clear()
 
         return response
 
@@ -331,9 +422,12 @@ class CreateAttachment(CreateView):
 #
 #     return render(request, "attachment_form.html", {"form": form})
 
-class DeleteCommentPage(DeleteView):
+class DeleteCommentPage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Comments
     template_name = "comment_delete.html"
+
+    # проверка пермиссий используя миксин
+    permission_required = "task_manager.delete_comments"
 
     def get_success_url(self):
         return reverse_lazy(

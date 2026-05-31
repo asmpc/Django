@@ -45,3 +45,17 @@ class AttachmentManager(models.Manager):
 
     def attachment_optimization(self):
         return self.get_queryset().attachment_optimization()
+
+
+class CommentQuerySet(models.QuerySet):
+
+    def comment_optimization(self):
+        return self.prefetch_related("user", "task").all().order_by( '-id')
+
+
+class CommentManager(models.Manager):
+    def get_queryset(self):
+        return CommentQuerySet(self.model, using=self._db)
+
+    def comment_optimization(self):
+        return self.get_queryset().comment_optimization()

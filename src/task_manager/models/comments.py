@@ -2,7 +2,7 @@ from django.db import models
 
 
 from config.models import BaseModel
-
+from task_manager.managers import CommentManager
 
 
 class Comments(BaseModel):
@@ -29,6 +29,8 @@ class Comments(BaseModel):
         on_delete=models.CASCADE,
         verbose_name="Задача",
     )
+
+    objects = CommentManager()
 
     class Meta:
         ordering = ["-created_at", "message"]

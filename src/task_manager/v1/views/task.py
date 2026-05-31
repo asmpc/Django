@@ -1,6 +1,9 @@
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
+from config.pagination import CustomPagination
 from task_manager.models import Tasks
 from task_manager.v1.serializers import TaskSerializer
 from rest_framework import status, mixins, generics
@@ -10,15 +13,18 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from drf_spectacular.utils import extend_schema
+from task_manager.v1.serializers.task import TaskQueryFilterSerializer
+import django_filters.rest_framework
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 
 # вручную создаю пагинацию, в generic уже есть, при указании настроек в setting
-class TaskPagination(PageNumberPagination):
-    page_size = 7
-    page_size_query_param = 'page_size'
-    # Максимум 100 объектов на страницу, даже если пользователь просит больше
-    max_page_size = 100
+# class TaskPagination(PageNumberPagination):
+#     page_size = 7
+#     page_size_query_param = 'page_size'
+#     # Максимум 100 объектов на страницу, даже если пользователь просит больше
+#     max_page_size = 100
 
 
 #generics
@@ -27,24 +33,49 @@ class TaskPagination(PageNumberPagination):
 class TasksListAPIView(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    generics.GenericAPIView
+    generics.GenericAPIView,
 ):
-    queryset = Tasks.objects.task_optimization()
+    serializer_class = TaskSerializer
+    pagination_class = CustomPagination
+    filterset_class = TaskQueryFilterSerializer
+
+
+    # функция для фильтрации и ограничения пользователя,
+    # чтобы он видел только свои задачи, а админ все
+    def get_queryset(self):
+        qs = Tasks.objects.task_optimization()
+        user = self.request.user
+
+        if user.is_staff:
+            return qs
+
+        return qs.filter(assignee=user)
+
+    # queryset = Tasks.objects.task_optimization()
 
     # queryset = (Tasks.objects
     #              .select_related("assignee", "project")
     #              .prefetch_related("tags", "comments")
     #              .all().order_by( '-id'))
 
-    serializer_class = TaskSerializer
+
+    # permission_classes = [IsAdminUser]
 
     # Добавляю пагинацию во вьюшку
-    pagination_class = TaskPagination
+    # pagination_class = TaskPagination
+
+    # Добавляю кастомный пагинатор
+    # pagination_class = CustomPagination
+
+    # Фильтрация
+    # filterset_class = TaskQueryFilterSerializer
 
 
     @extend_schema(
         summary="Get all tasks",
         description="Get all tasks",
+
+        request=TaskQueryFilterSerializer,
         responses={200: TaskSerializer},
     )
     def get(self, request, *args, **kwargs):
@@ -58,6 +89,7 @@ class TasksListAPIView(
         responses={201: TaskSerializer},
     )
     def post(self, request, *args, **kwargs):
+
         return self.create(request, *args, **kwargs)
 
 
